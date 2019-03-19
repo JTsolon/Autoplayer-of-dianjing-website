@@ -1,9 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Sun Jan 20 17:01:50 2019
 
-@author: jiangtao
-"""
 '''
 修改日志：
 在login函数中修改了登陆网址，目前是进入第二页，所以添加了进入第二页的语句，if和else语句中都要添加
@@ -18,9 +14,6 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 
 import time
-#from selenium.webdriver.chrome.options import Options
-
-
 
 #login函数中，如果需要进入其他页面，比如第二页，则在if和else语句末都加入转页语句，不需要时，记得注释掉
 def login(driver,login_times):
@@ -38,7 +31,7 @@ def login(driver,login_times):
         driver.switch_to_window(handles[-1])
         #获取‘听课中心’对象，并点击进入
         elem = driver.find_element_by_xpath(r'//*[@id="ng-app"]/body/div[3]/div[2]/div[1]/div[2]/ul/li[2]/a')
-        elem.click()                          #//*[@id="ng-app"]/body/div[3]/div[2]/div[1]/div[2]/ul/li[2]/a
+        elem.click()                         
         time.sleep(5)
         
         #由于第一页听完，点击进入第二页
@@ -57,13 +50,13 @@ def login(driver,login_times):
         #获取用户名框对象，并清空后输入用户名
         elem = driver.find_element_by_xpath(r'//*[@id="username"]')
         elem.clear()
-        elem.send_keys('18607915821')
+        elem.send_keys('your username')
         time.sleep(2)
         
         #获取密码框对象，清空后输入密码
         elem = driver.find_element_by_xpath(r'//*[@id="password"]')
         elem.clear()
-        elem.send_keys('18607915821')
+        elem.send_keys('your password')
         time.sleep(2)
         
         #获取登录键对象，并点击登录
@@ -108,30 +101,15 @@ sub_v_start=0 #子视频起始下标
 login_times=0
 quit_normal=False
 while True:
-    #定义变量以用来判断是否是
+    #定义变量以用来判断是否是第一次登录
     try_times=0
     login_times+=1
-    '''options = Options()
-    prefs = {
-            #"profile.default_content_setting_values.plugins": 1,
-            #"profile.content_settings.plugin_whitelist.adobe-flash-player": 1,
-            "profile.content_settings.exceptions.plugins.*,*.per_resource.adobe-flash-player": 1,
-            "PluginsAllowedForUrls": "http://sqzy.zfwx.com/wxqt/"
-            }
-
-    options.add_experimental_option("prefs",prefs)'''
+    
     #登录并进入听课中心
     login(driver,login_times)
 
     #对每个顶层视频进行循环处理
     for i in range(v_start,10):
-        '''#进入第2页
-        page_2=driver.find_element_by_xpath(r'//*[@id="ng-app"]/body/div[3]/div[2]/div[2]/div/div/div[2]/div[2]/i[2]')
-        page_2.click()
-        time.sleep(2)'''
-        '''#登录并进入听课中心
-        driver=webdriver.Chrome()
-        login(driver)'''
        
         #获取整个table对象,这里可能返回后但是并非课程列表页面，若此，则触发异常并捕获，在处理器中重新进入选课中心的课程列表页面
         try:
@@ -160,39 +138,15 @@ while True:
         #获取子逻辑下的所有子视频的逻辑
         videos=sub_v.find_elements_by_css_selector("[class='videoList of ng-scope']")
         
-        #对每个子视频逻辑循环处理
-        #for j,sv in enumerate(videos):
-            
-        #跳过第一个顶层视频逻辑下的第一个子视频，即第一个视频第一讲，因为已经看完
-        '''if (i==0) &(j<=2):
-            continue'''
-        '''elif (i==0)&(j==1):
-            elem=browser.find_element_by_xpath('//*[@id="commentTishiWindowS"]/div/div[2]/a')
-            elem.click()'''
-        #获取视频时长
-        #timespan=int(sv.find_element_by_css_selector('span.timer.ng-binding').text)*60
-        #timespan +=2*60+15
-        
         #获取播放对象
         player=videos[sub_v_start].find_element_by_class_name('player')
         
         #点击播放，并让程序休眠播放时长，然后再循环播放下一个视频
         player.click()
-        time.sleep(3) #再次出错，导致alert窗口没有被点击的话，原因可能是这里休眠的时间过长，导致网页alert窗口早就出现，但是程序还未到等待语句，而等待语句在alert窗口出现之后再运行就会失效了
+        time.sleep(3) #如果再次出错，导致alert窗口没有被点击的话，原因可能是这里休眠的时间过长，导致网页alert窗口早就出现，但是程序还未到等待语句，而等待语句在alert窗口出现之后再运行就会失效了
         
         #本视频没有听完，从中继续接着听,如果抛出异常，说明是不需要接着听，或者出现了‘重复听课不计入课时’的提示，两种情况都可以交给except中的语句处理
-        '''try:
-            handles = driver.window_handles
-            driver.switch_to.window(handles[-1])
-            WebDriverWait(driver,timeout=10,poll_frequency=1).until(EC.alert_is_present())
-            handles = driver.window_handles
-            try_times+=1
-            if try_times>1:
-                driver.close()
-            driver.switch_to.window(handles[-1])
-            print('just for testing!')
-            driver.switch_to_alert().accept()
-            print('So far is okay!')'''
+        
         #如果因为中途中断，则出现'重复听课不计入课时’的提示，点击确定键
         try:
             #print('run here!')
@@ -226,12 +180,6 @@ while True:
             except:
                 print('if the script exits, here maybe wrong, line 206!')
                 #WebDriverWait(driver,timeout=20,poll_frequency=1).until(EC.alert_is_present())
-            
-        
-        #获取‘flash’提示对象
-        #elem=driver.find_element_by_xpath('//*[@id="commentTishiWindowS"]/div/div[2]/a')
-        #elem.click()
-        #time.sleep(2)
         
         #捕获弹出框，并确认运行flash
         #WebDriverWait(driver,timeout=60,poll_frequency=10).until(EC.alert_is_present())
